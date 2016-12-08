@@ -30,11 +30,8 @@ class ViewController: UIViewController {
             ),
             rows: nil)
 
-        let delay = dispatch_time(
-            DISPATCH_TIME_NOW as dispatch_time_t,
-            2 * Int64(NSEC_PER_SEC)
-        )
-        dispatch_after(delay, dispatch_get_main_queue()) { [unowned self] () -> Void in
+        let delay = DispatchTime.now() as DispatchTime + Double(2 * Int64(NSEC_PER_SEC)) / Double(NSEC_PER_SEC)
+        DispatchQueue.main.asyncAfter(deadline: delay) { [unowned self] () -> Void in
             self.source.apply(diff: diff, toTableView: self.tableView)
         }
     }

@@ -9,23 +9,23 @@
 import Foundation
 import UIKit
 
-extension NSIndexSet {
-    static func from(#array: [Int]) -> NSIndexSet {
-        var set = NSMutableIndexSet()
+extension IndexSet {
+    static func from(array: [Int]) -> IndexSet {
+        let set = NSMutableIndexSet()
         for index in array {
-            set.addIndex(index)
+            set.add(index)
         }
-        return set.copy() as! NSIndexSet
+        return set.copy() as! IndexSet
     }
 }
 
-extension NSIndexPath {
-    static func from(#rowIndex: TableMarkup.RowIndex) -> NSIndexPath {
-        return NSIndexPath(forRow: rowIndex.row, inSection: rowIndex.section)
+extension IndexPath {
+    static func from(rowIndex: TableMarkup.RowIndex) -> IndexPath {
+        return IndexPath(row: rowIndex.row, section: rowIndex.section)
     }
 
-    static func from(#rowIndices: [TableMarkup.RowIndex]) -> [NSIndexPath] {
-        return rowIndices.map { NSIndexPath.from(rowIndex: $0) }
+    static func from(rowIndices: [TableMarkup.RowIndex]) -> [IndexPath] {
+        return rowIndices.map { IndexPath.from(rowIndex: $0) }
     }
 }
 
@@ -61,21 +61,21 @@ struct TableMarkup {
             self.sections = sections
         }
 
-        func apply(#diff: TableDiff) -> Table {
+        func apply(diff: TableDiff) -> Table {
             // TODO:
             var newSections = sections
             if let deleted = diff.sections?.deleted {
                 for index in deleted {
                     let section = sections[index]
-                    if let newIndex = find(newSections, section) {
-                        newSections.removeAtIndex(newIndex)
+                    if let newIndex = newSections.index(of: section) {
+                        newSections.remove(at: newIndex)
                     }
                 }
             }
             return Table(newSections)
         }
 
-        func diff(table: Table) -> TableDiff? {
+        func diff(_ table: Table) -> TableDiff? {
             return nil
         }
     }
@@ -105,44 +105,44 @@ struct TableMarkup {
             self.table = table
         }
 
-        func apply(#diff: TableDiff, toTableView view: UITableView) {
+        func apply(diff: TableDiff, toTableView view: UITableView) {
             view.beginUpdates()
 
             if let added = diff.sections?.added {
                 view.insertSections(
-                    NSIndexSet.from(array: added),
-                    withRowAnimation: .Automatic
+                    IndexSet.from(array: added),
+                    with: .automatic
                 )
             }
             if let updated = diff.sections?.updated {
                 view.reloadSections(
-                    NSIndexSet.from(array: updated),
-                    withRowAnimation: .Automatic
+                    IndexSet.from(array: updated),
+                    with: .automatic
                 )
             }
             if let deleted = diff.sections?.deleted {
                 view.deleteSections(
-                    NSIndexSet.from(array: deleted),
-                    withRowAnimation: .Automatic
+                    IndexSet.from(array: deleted),
+                    with: .automatic
                 )
             }
 
             if let added = diff.rows?.added {
-                view.insertRowsAtIndexPaths(
-                    NSIndexPath.from(rowIndices: added),
-                    withRowAnimation: .Automatic
+                view.insertRows(
+                    at: IndexPath.from(rowIndices: added),
+                    with: .automatic
                 )
             }
             if let updated = diff.rows?.updated {
-                view.reloadRowsAtIndexPaths(
-                    NSIndexPath.from(rowIndices: updated),
-                    withRowAnimation: .Automatic
+                view.reloadRows(
+                    at: IndexPath.from(rowIndices: updated),
+                    with: .automatic
                 )
             }
             if let deleted = diff.rows?.deleted {
-                view.deleteRowsAtIndexPaths(
-                    NSIndexPath.from(rowIndices: deleted),
-                    withRowAnimation: .Automatic
+                view.deleteRows(
+                    at: IndexPath.from(rowIndices: deleted),
+                    with: .automatic
                 )
             }
 
@@ -150,18 +150,18 @@ struct TableMarkup {
             view.endUpdates()
         }
 
-        @objc func tableView(tableView: UITableView,
-            cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+        @objc func tableView(_ tableView: UITableView,
+            cellForRowAt indexPath: IndexPath) -> UITableViewCell
         {
             let row = table.sections[indexPath.section].rows[indexPath.row]
-            return UITableViewCell(style: .Default, reuseIdentifier: row.id)
+            return UITableViewCell(style: .default, reuseIdentifier: row.id)
         }
 
-        func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+        func numberOfSections(in tableView: UITableView) -> Int {
             return table.sections.count
         }
 
-        @objc func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        @objc func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
             return table.sections[section].rows.count
         }
     }
